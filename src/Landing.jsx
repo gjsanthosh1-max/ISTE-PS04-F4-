@@ -43,7 +43,7 @@ const TRANSLATIONS = {
 
 function Landing() {
   const [quoteIndex, setQuoteIndex] = useState(0)
-  const [stats, setStats] = useState({ volunteers: 0, resolved: 0, active: 0 })
+const [stats, setStats] = useState({ volunteers: null, resolved: null, active: 0 })
   const [lang, setLang] = useState("en")
   const t = TRANSLATIONS[lang]
 
@@ -74,25 +74,25 @@ function Landing() {
   return (
     <div className="min-h-screen bg-[#050b18] text-white relative overflow-hidden flex flex-col">
       {/* Top nav */}
-      <nav className="flex items-center justify-between px-6 md:px-10 py-4 relative z-20">
-        <div className="flex items-center gap-3">
-          <img src="/logo.png" alt="UYIR" className="h-16 w-16 rounded-full object-cover" />
-          <span className="text-xl font-semibold tracking-wide text-white">UYIR</span>
+      <nav className="flex flex-wrap items-center justify-between gap-3 px-4 sm:px-6 md:px-10 py-4 relative z-20">
+        <div className="flex items-center gap-2 sm:gap-3">
+          <img src="/logo.png" alt="UYIR" className="h-10 w-10 sm:h-16 sm:w-16 rounded-full object-cover" />
+          <span className="text-base sm:text-xl font-semibold tracking-wide text-white">UYIR</span>
         </div>
-        <div className="flex items-center gap-3">
+        <div className="flex items-center gap-2 flex-wrap justify-end">
           <button
             onClick={() => setLang(lang === "en" ? "ta" : "en")}
-            className="text-xs px-3 py-1.5 rounded-full border border-slate-600 text-slate-300 hover:bg-white/5"
+            className="text-xs px-2.5 py-1.5 rounded-full border border-slate-600 text-slate-300 hover:bg-white/5"
           >
             {lang === "en" ? "தமிழ்" : "English"}
           </button>
           <Link to="/signin">
-            <Button variant="ghost" className="text-cyan-300 hover:text-cyan-200 hover:bg-white/5">
+            <Button size="sm" variant="ghost" className="text-cyan-300 hover:text-cyan-200 hover:bg-white/5 text-xs sm:text-sm px-2.5 sm:px-4">
               {t.signin}
             </Button>
           </Link>
           <Link to="/join">
-            <Button className="bg-gradient-to-r from-blue-600 to-cyan-500 hover:from-blue-500 hover:to-cyan-400 text-white border-0">
+            <Button size="sm" className="bg-gradient-to-r from-blue-600 to-cyan-500 hover:from-blue-500 hover:to-cyan-400 text-white border-0 text-xs sm:text-sm px-2.5 sm:px-4">
               {t.join}
             </Button>
           </Link>
@@ -127,13 +127,13 @@ function Landing() {
           </p>
         </div>
 
-        <div className="flex gap-8 md:gap-12 justify-center flex-wrap">
+       <div className="flex gap-8 md:gap-12 justify-center flex-wrap">
           <div className="text-center">
-            <p className="text-2xl md:text-3xl font-bold text-cyan-400">{stats.volunteers}</p>
+            <p className="text-2xl md:text-3xl font-bold text-cyan-400">{stats.volunteers ?? "–"}</p>
             <p className="text-xs text-slate-500 uppercase tracking-wide">{t.registered}</p>
           </div>
           <div className="text-center">
-            <p className="text-2xl md:text-3xl font-bold text-cyan-400">{stats.resolved}</p>
+            <p className="text-2xl md:text-3xl font-bold text-cyan-400">{stats.resolved ?? "–"}</p>
             <p className="text-xs text-slate-500 uppercase tracking-wide">{t.handled}</p>
           </div>
         </div>

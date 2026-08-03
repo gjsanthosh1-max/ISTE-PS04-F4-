@@ -1,3 +1,7 @@
+import { db } from "@/firebase"
+import { doc, getDoc } from "firebase/firestore"
+import { NotificationProvider, useNotifications } from "@/lib/NotificationSystem"
+import { useLocation } from "react-router-dom"
 import SafeCheckIn from "@/SafeCheckIn"
 import { useState, useEffect } from "react"
 import { BrowserRouter, Routes, Route, Navigate, useNavigate, Link } from "react-router-dom"
@@ -20,6 +24,13 @@ function AppShell() {
     const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
       setUser(currentUser)
       setLoading(false)
+      if (currentUser) {
+        const redirect = sessionStorage.getItem("postAuthRedirect")
+        if (redirect) {
+          sessionStorage.removeItem("postAuthRedirect")
+          navigate(redirect)
+        }
+      }
     })
     return unsubscribe
   }, [])
@@ -35,8 +46,8 @@ function AppShell() {
   return (
     <Routes>
       <Route path="/" element={<Landing />} />
-      <Route path="/signin" element={<Auth startMode="login" onLogin={() => navigate("/sos")} />} />
-      <Route path="/join" element={<Auth startMode="signup" onLogin={() => navigate("/profile")} />} />
+      <Route path="/signin" element={<Auth startMode="login" onLogin={() => {}} />} />
+      <Route path="/join" element={<Auth startMode="signup" onLogin={() => {}} />} />
 
       {user ? (
         <>
@@ -56,25 +67,52 @@ function AppShell() {
 }
 
 function Shell({ user, children }) {
+  const { unreadCount, clearUnread } = useNotifications()
+  const location = useLocation()
+  const [role, setRole] = useState(null)
+
+  useEffect(() => {
+    if (location.pathname === "/sos") clearUnread()
+  }, [location.pathname])
+
+  useEffect(() => {
+    const loadRole = async () => {
+      const snap = await getDoc(doc(db, "users", user.uid))
+      if (snap.exists()) setRole(snap.data().role)
+    }
+    loadRole()
+  }, [user.uid])
+
   const handleLogout = async () => {
     await signOut(auth)
     window.location.href = "/"
   }
 
-  const navLink = "text-sm px-3 py-1.5 rounded-full text-slate-300 hover:text-cyan-300 hover:bg-white/5 transition-colors"
+  const navLink = "text-sm px-3 py-1.5 rounded-full text-slate-300 hover:text-cyan-300 hover:bg-white/5 transition-colors relative"
 
   return (
     <div className="min-h-screen bg-[#050b18] text-white">
-      <div className="border-b border-slate-800 bg-[#050b18]/80 backdrop-blur-sm sticky top-0 z-30">
-        <div className="flex justify-between items-center max-w-4xl mx-auto py-3 px-4">
-          <div className="flex items-center gap-2">
+       <div className="border-b border-slate-800 bg-[#050b18]/80 backdrop-blur-sm sticky top-0 z-30">
+        <div className="flex flex-wrap justify-between items-center gap-2 max-w-4xl mx-auto py-3 px-4"> 
+        <div className="flex items-center gap-2">
             <img src="/logo.png" alt="UYIR" className="h-9 w-9 rounded-full object-cover" />
             <span className="font-semibold tracking-wide hidden sm:inline">UYIR</span>
           </div>
-          <div className="flex gap-1">
-            <Link to="/sos" className={navLink}>SOS</Link>
-            <Link to="/coordinator" className={navLink}>Coordinator</Link>
-            <Link to="/blood" className={navLink}>Blood</Link>
+<div className="flex gap-1 flex-wrap justify-center order-3 sm:order-none w-full sm:w-auto">
+              <Link to="/sos" className={navLink}>
+              SOS
+              {unreadCount > 0 && (
+                <span className="absolute -top-1 -right-1 bg-red-600 text-white text-[10px] rounded-full w-4 h-4 flex items-center justify-center animate-pulse">
+                  {unreadCount}
+                </span>
+              )}
+            </Link>
+            {role === "coordinator" && (
+              <Link to="/coordinator" className={navLink}>Coordinator</Link>
+            )}
+            {role === "volunteer" && (
+              <Link to="/blood" className={navLink}>Blood</Link>
+            )}
             <Link to="/safe" className={navLink}>I'm Safe</Link>
             <Link to="/profile" className={navLink}>Profile</Link>
           </div>
@@ -96,7 +134,9 @@ function Shell({ user, children }) {
 function App() {
   return (
     <BrowserRouter>
-      <AppShell />
+      <NotificationProvider>
+        <AppShell />
+      </NotificationProvider>
     </BrowserRouter>
   )
 }

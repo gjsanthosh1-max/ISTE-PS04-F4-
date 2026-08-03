@@ -11,6 +11,7 @@ const SKILL_OPTIONS = ["First Aid", "Swimming/Rescue", "Driving", "Cooking", "Me
 function ProfileSetup() {
   const [skills, setSkills] = useState([])
   const [bloodGroup, setBloodGroup] = useState("")
+  const [locality, setLocality] = useState("")
   const [location, setLocation] = useState(null)
   const [locating, setLocating] = useState(false)
   const [error, setError] = useState("")
@@ -51,6 +52,7 @@ function ProfileSetup() {
       skills,
       bloodGroup,
       location,
+      locality,
     })
     navigate("/")
   }
@@ -79,6 +81,15 @@ function ProfileSetup() {
                 </button>
               ))}
             </div>
+          </div>
+
+          <div>
+            <p className="text-sm text-gray-400 mb-2">Locality / Area name</p>
+            <Input
+              placeholder="e.g. Adyar, Chennai"
+              value={locality}
+              onChange={(e) => setLocality(e.target.value)}
+            />
           </div>
 
           <div>

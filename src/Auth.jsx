@@ -5,7 +5,7 @@ import {
   signInWithEmailAndPassword,
   updateProfile,
 } from "firebase/auth"
-import { doc, setDoc } from "firebase/firestore"
+import { doc, setDoc, getDoc } from "firebase/firestore"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
@@ -25,6 +25,7 @@ function Auth({ onLogin, startMode = "signup" }) {
     setError("")
     try {
       if (isSignUp) {
+        sessionStorage.setItem("postAuthRedirect", "/profile")
         const cred = await createUserWithEmailAndPassword(auth, email, password)
         await updateProfile(cred.user, { displayName })
         await setDoc(doc(db, "users", cred.user.uid), {
@@ -37,7 +38,10 @@ function Auth({ onLogin, startMode = "signup" }) {
           createdAt: new Date().toISOString(),
         })
       } else {
-        await signInWithEmailAndPassword(auth, email, password)
+        const cred = await signInWithEmailAndPassword(auth, email, password)
+        const userDoc = await getDoc(doc(db, "users", cred.user.uid))
+        const userRole = userDoc.exists() ? userDoc.data().role : "volunteer"
+        sessionStorage.setItem("postAuthRedirect", userRole === "coordinator" ? "/coordinator" : "/sos")
       }
       onLogin()
     } catch (err) {
@@ -58,7 +62,8 @@ function Auth({ onLogin, startMode = "signup" }) {
       </video>
       <div className="absolute inset-0 bg-gradient-to-b from-[#050b18]/40 via-[#050b18]/50 to-[#050b18]/80" />
 
-        <Card className="w-full max-w-[380px] relative z-10 bg-[#0a1428]/95 border-slate-700 backdrop-blur-sm text-white [&_*]:text-white">        <CardHeader>
+      <Card className="w-full max-w-[380px] relative z-10 bg-[#0a1428]/95 border-slate-700 backdrop-blur-sm text-white">
+        <CardHeader>
           <CardTitle className="text-white">{isSignUp ? "Create an account" : "Welcome back"}</CardTitle>
         </CardHeader>
         <CardContent>
@@ -73,11 +78,11 @@ function Auth({ onLogin, startMode = "signup" }) {
                   onChange={(e) => setDisplayName(e.target.value)}
                   required
                 />
-                <div className="flex gap-2">
+                <div className="flex flex-col gap-2">
                   <button
                     type="button"
                     onClick={() => setRole("volunteer")}
-                    className={`flex-1 py-2 rounded-md text-sm border ${
+                    className={`w-full py-2 rounded-md text-sm border ${
                       role === "volunteer" ? "bg-white text-black" : "border-slate-600 text-slate-400"
                     }`}
                   >
@@ -85,8 +90,17 @@ function Auth({ onLogin, startMode = "signup" }) {
                   </button>
                   <button
                     type="button"
+                    onClick={() => setRole("victim")}
+                    className={`w-full py-2 rounded-md text-sm border ${
+                      role === "victim" ? "bg-white text-black" : "border-slate-600 text-slate-400"
+                    }`}
+                  >
+                    I Need Help (Victim/Affected)
+                  </button>
+                  <button
+                    type="button"
                     onClick={() => setRole("coordinator")}
-                    className={`flex-1 py-2 rounded-md text-sm border ${
+                    className={`w-full py-2 rounded-md text-sm border ${
                       role === "coordinator" ? "bg-white text-black" : "border-slate-600 text-slate-400"
                     }`}
                   >
@@ -112,7 +126,10 @@ function Auth({ onLogin, startMode = "signup" }) {
               required
             />
             {error && <p className="text-red-400 text-sm">{error}</p>}
-            <Button type="submit" className="w-full bg-gradient-to-r from-blue-600 to-cyan-500 hover:from-blue-500 hover:to-cyan-400 text-white border-0">
+            <Button
+              type="submit"
+              className="w-full bg-gradient-to-r from-blue-600 to-cyan-500 hover:from-blue-500 hover:to-cyan-400 text-white border-0"
+            >
               {isSignUp ? "Sign Up" : "Log In"}
             </Button>
           </form>
