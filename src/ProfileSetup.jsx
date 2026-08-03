@@ -17,6 +17,8 @@ function ProfileSetup() {
   const [error, setError] = useState("")
   const navigate = useNavigate()
 
+  const inputStyle = "bg-[#0f1c38] border-slate-600 text-white placeholder:text-slate-500"
+
   const toggleSkill = (skill) => {
     setSkills((prev) =>
       prev.includes(skill) ? prev.filter((s) => s !== skill) : [...prev, skill]
@@ -58,23 +60,23 @@ function ProfileSetup() {
   }
 
   return (
-    <div className="min-h-screen bg-black flex items-center justify-center px-4 py-8">
-      <Card className="w-full max-w-md">
+    <div className="min-h-screen bg-[#050b18] flex items-center justify-center px-4 py-8">
+      <Card className="w-full max-w-md bg-[#0a1428] border-slate-700">
         <CardHeader>
-          <CardTitle>Complete your profile</CardTitle>
+          <CardTitle className="text-white">Complete your profile</CardTitle>
         </CardHeader>
         <CardContent className="space-y-5">
           <div>
-            <p className="text-sm text-gray-400 mb-2">Your skills (select all that apply)</p>
+            <p className="text-sm text-slate-400 mb-2">Your skills (select all that apply)</p>
             <div className="flex flex-wrap gap-2">
               {SKILL_OPTIONS.map((skill) => (
                 <button
                   key={skill}
                   onClick={() => toggleSkill(skill)}
-                  className={`px-3 py-1 rounded-full text-sm border ${
+                  className={`px-3 py-1 rounded-full text-sm border transition-colors ${
                     skills.includes(skill)
-                      ? "bg-white text-black"
-                      : "border-gray-600 text-gray-400"
+                      ? "bg-white text-black border-white"
+                      : "border-slate-600 text-slate-400 hover:bg-white/5"
                   }`}
                 >
                   {skill}
@@ -84,8 +86,9 @@ function ProfileSetup() {
           </div>
 
           <div>
-            <p className="text-sm text-gray-400 mb-2">Locality / Area name</p>
+            <p className="text-sm text-slate-400 mb-2">Locality / Area name</p>
             <Input
+              className={inputStyle}
               placeholder="e.g. Adyar, Chennai"
               value={locality}
               onChange={(e) => setLocality(e.target.value)}
@@ -93,8 +96,9 @@ function ProfileSetup() {
           </div>
 
           <div>
-            <p className="text-sm text-gray-400 mb-2">Blood group (optional)</p>
+            <p className="text-sm text-slate-400 mb-2">Blood group (optional)</p>
             <Input
+              className={inputStyle}
               placeholder="e.g. O+, A-, B+"
               value={bloodGroup}
               onChange={(e) => setBloodGroup(e.target.value)}
@@ -102,15 +106,24 @@ function ProfileSetup() {
           </div>
 
           <div>
-            <p className="text-sm text-gray-400 mb-2">Your location</p>
-            <Button type="button" variant="outline" onClick={getLocation} disabled={locating}>
+            <p className="text-sm text-slate-400 mb-2">Your location</p>
+            <Button
+              type="button"
+              variant="outline"
+              className="border-slate-600 text-slate-200 hover:bg-white/5"
+              onClick={getLocation}
+              disabled={locating}
+            >
               {locating ? "Getting location..." : location ? "✓ Location captured" : "Share my location"}
             </Button>
           </div>
 
-          {error && <p className="text-red-500 text-sm">{error}</p>}
+          {error && <p className="text-red-400 text-sm">{error}</p>}
 
-          <Button onClick={handleSave} className="w-full">
+          <Button
+            onClick={handleSave}
+            className="w-full bg-gradient-to-r from-blue-600 to-cyan-500 hover:from-blue-500 hover:to-cyan-400 text-white border-0"
+          >
             Save & Continue
           </Button>
         </CardContent>
